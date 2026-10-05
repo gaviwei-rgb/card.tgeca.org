@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>台灣綠能公益發展協會｜數位名片</title>
+<script>
+// Apps Script 部署網址（結尾是 /exec，不要加斜線）。網址改變時只需要改這一行。
+const EXEC = 'https://script.google.com/macros/s/AKfycbzMtNyYz0tP42hKbaek3OGV7-VP21PP1HBHDBP7PkL3fElaHV0TmmWhiLRq06-xVLCTzQ/exec';
+
+// 支援 https://card.tgeca.org/?id=gavi 與 https://card.tgeca.org/gavi 兩種寫法
+let id = new URLSearchParams(location.search).get('id');
+if (!id) {
+  const seg = location.pathname.replace(/^\/+|\/+$/g, '');
+  if (seg && !/\.html?$/i.test(seg)) id = decodeURIComponent(seg);
+}
+const target = EXEC + (id ? '?id=' + encodeURIComponent(id) : '');
+location.replace(target);
+window.addEventListener('DOMContentLoaded', () => { document.getElementById('go').href = target; });
+</script>
+<style>body{font:16px/1.6 "Noto Sans TC",system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;color:#444}</style>
+</head>
+<body>
+<p>正在開啟名片… <a id="go" href="#">沒有自動跳轉請點這裡</a></p>
+</body>
+</html>
