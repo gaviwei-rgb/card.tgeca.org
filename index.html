@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>數位名片｜台灣綠能公益發展協會</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>數位名片｜台灣綠能公益發展協會</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;700&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--coral:#f6816c;--vh:1vh;--pad:12px;--gap:12px;--bar:48px}
 @supports (height:1dvh){:root{--vh:1dvh}}
 /* 整個 body（名片 + 按鈕）= 裝置高度 90%；名片維持 9:16，高度取「剩餘高度」與「寬度允許的高度」較小者 */
 :root{--h:min(calc(90 * var(--vh) - 2 * var(--pad) - var(--gap) - var(--bar)), calc((100vw - 2 * var(--pad)) * 16 / 9))}
-    html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 *{box-sizing:border-box}
 body{margin:0;height:calc(90 * var(--vh));background:#e9ecf0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--gap);padding:var(--pad);font-family:"Noto Sans TC",sans-serif}
 .card{position:relative;height:var(--h);width:calc(var(--h) * 9 / 16);flex:none;container-type:inline-size;background:#fff;overflow:hidden;box-shadow:0 1px 8px rgba(0,0,0,.15)}
@@ -28,6 +28,9 @@ body{margin:0;height:calc(90 * var(--vh));background:#e9ecf0;display:flex;flex-d
 [hidden]{display:none!important}
 .contacts{position:absolute;left:12.963%;top:66.901%;width:68%;display:flex;flex-direction:column}
 .row{display:flex;align-items:center;gap:1.267cqw;height:6.296cqw;color:#666;text-decoration:none;font:400 4.5cqw/1 Barlow,"Noto Sans TC",sans-serif;letter-spacing:.08em}
+.contacts.compact{top:66.458%}
+.contacts.compact .row{height:5cqw}
+a.row:not([href]){cursor:default}
 .row img{flex:none;width:4.63cqw;height:4.63cqw}
 .row span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-bottom:.1em}
 .row:focus-visible{outline:3px solid var(--coral);outline-offset:3px}
@@ -66,6 +69,7 @@ window.addEventListener('error', function (e) {
     <a class="row" id="row_line" target="_blank" rel="noopener"><img id="ico_line" alt=""><span id="line"></span></a>
     <a class="row" id="row_email"><img id="ico_email" alt=""><span id="email"></span></a>
     <a class="row" id="row_linkedin" target="_blank" rel="noopener"><img id="ico_linkedin" alt=""><span id="linkedin"></span></a>
+    <a class="row" id="row_extra" target="_blank" rel="noopener"><img id="ico_extra" alt=""><span id="extra"></span></a>
   </div>
   <p class="t" id="name_zh"></p>
   <p class="t lat" id="name_en"></p>
@@ -85,7 +89,7 @@ window.addEventListener('error', function (e) {
 const API_URL = 'https://script.google.com/macros/s/AKfycbzVfkrcTlY3uK5HMJj2yEwOLUuL0gOhlZxtYc8RpfhIfdtAYSQv0xjwRNXbZ-FYp43LzQ/exec'; // Apps Script 部署網址（結尾 /exec）；網址改變時只改這一行
 const SHARE_BASE = 'https://card.tgeca.org';
 const ART = '/assets/art.svg', ICON_PHONE = '/assets/icon-phone.svg', ICON_LINE = '/assets/icon-line.svg',
-      ICON_EMAIL = '/assets/icon-email.svg', ICON_LINKEDIN = '/assets/icon-linkedin.svg';
+      ICON_EMAIL = '/assets/icon-email.svg', ICON_LINKEDIN = '/assets/icon-linkedin.svg', ICON_EXTRA = '/assets/icon-circle.svg';
 const $ = id => document.getElementById(id);
 
 // ===== 讀取資料：優先 fetch，失敗時改用 JSONP =====
@@ -132,7 +136,13 @@ const liRaw = card.linkedin;
 const liPath = liRaw.replace(/^https?:\/\/(www\.)?linkedin\.com\//i, '').replace(/^(www\.)?linkedin\.com\//i, '').replace(/\/+$/, '');
 $('linkedin').textContent = /^(in|company)\//i.test(liPath) ? liPath : 'in/' + liPath;
 $('row_linkedin').href = /^https?:\/\//i.test(liRaw) ? liRaw : 'https://www.linkedin.com/' + (/^(in|company)\//i.test(liPath) ? liPath : 'in/' + liPath);
-['phone','line','email','linkedin'].forEach(k => { $('row_' + k).hidden = !card[k]; });
+// 萬用欄位 extra：可填文字或網址；網址會變成可點的連結
+const exRaw = card.extra || '', exIsUrl = /^https?:\/\//i.test(exRaw);
+$('extra').textContent = exIsUrl ? exRaw.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/+$/, '') : exRaw;
+if (exIsUrl) $('row_extra').href = exRaw; else $('row_extra').removeAttribute('href');
+const KEYS = ['phone','line','email','linkedin','extra'];
+KEYS.forEach(k => { $('row_' + k).hidden = !card[k]; });
+$('contacts').classList.toggle('compact', KEYS.filter(k => card[k]).length >= 5); // 五列全滿時縮小間距，避免壓到協會資訊
 $('org').append(org.name + ' / 統編 ' + org.taxId, document.createElement('br'), org.address);
 $('site').textContent = org.website;
 
@@ -145,6 +155,7 @@ function vcard() {
   if (card.phone) L.push('TEL;TYPE=CELL:' + card.phone);
   if (card.email) L.push('EMAIL:' + card.email);
   if (card.linkedin) L.push('URL;TYPE=LinkedIn:' + $('row_linkedin').href);
+  if (card.extra) L.push(/^https?:\/\//i.test(card.extra) ? 'URL:' + card.extra : 'NOTE:' + esc(card.extra));
   L.push('END:VCARD');
   return L.join('\r\n');
 }
@@ -157,11 +168,15 @@ $('save').onclick = () => {
 $('share').onclick = async () => {
   try {
     if (navigator.share) await navigator.share({ title: card.name_zh + '的名片', url: pageUrl });
-    else { await navigator.clipboard.writeText(pageUrl); $('share').textContent = '已複製連結'; }
+    else {
+      await navigator.clipboard.writeText(pageUrl);
+      const lab = $('share').innerHTML; $('share').textContent = '已複製連結';
+      setTimeout(() => { $('share').innerHTML = lab; }, 2000);
+    }
   } catch (e) {}
 };
 
-$('ico_phone').src = ICON_PHONE; $('ico_line').src = ICON_LINE; $('ico_email').src = ICON_EMAIL; $('ico_linkedin').src = ICON_LINKEDIN;
+$('ico_phone').src = ICON_PHONE; $('ico_line').src = ICON_LINE; $('ico_email').src = ICON_EMAIL; $('ico_linkedin').src = ICON_LINKEDIN; $('ico_extra').src = ICON_EXTRA;
 
 $('art').src = ART; $('sdg').src = SDG_URL;
 
@@ -183,7 +198,7 @@ async function renderCard() {
   const W = 1080, H = 1920, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const g = cv.getContext('2d');
   const load = (src, cors) => new Promise(res => { const i = new Image(); if (cors) i.crossOrigin = 'anonymous'; i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
-  const rows = [['phone', ICON_PHONE], ['line', ICON_LINE], ['email', ICON_EMAIL], ['linkedin', ICON_LINKEDIN]]
+  const rows = [['phone', ICON_PHONE], ['line', ICON_LINE], ['email', ICON_EMAIL], ['linkedin', ICON_LINKEDIN], ['extra', ICON_EXTRA]]
     .filter(([k]) => card[k]).map(([k, ic]) => [$(k).textContent, ic]);
   const all = [card.name_zh, card.name_en, card.title_zh, card.title_en, org.name, org.address, org.taxId, org.website, ...rows.map(r => r[0])].join('');
   await Promise.all([['500 62px "Noto Sans TC"', card.name_zh], ['400 40px "Noto Sans TC"', all], ['700 57px Barlow', all], ['400 48px Barlow', all]]
@@ -201,10 +216,11 @@ async function renderCard() {
   T(card.name_en, 370.5, 974.8, '700 57px ' + LAT, '#f6816c', 57 * .11);
   T(card.title_zh, 141.6, 1078.8, '400 39.9px ' + ZH, '#474747', 39.9 * .11);
   T(card.title_en, 141.6, 1131.3, '400 39.9px ' + LAT, '#666', 39.9 * .07);
+  const pitch = rows.length >= 5 ? 54 : 68, top0 = rows.length >= 5 ? 1276 : 1284.5;
   rows.forEach(([txt], i) => {
-    const top = 1284.5 + i * 68;
-    if (icons[i]) g.drawImage(icons[i], 140, top + 9, 50, 50);
-    T(txt, 203.7, top + 34, '400 48.6px ' + LAT, '#666', 48.6 * .08, 'middle');
+    const top = top0 + i * pitch;
+    if (icons[i]) g.drawImage(icons[i], 140, top + (pitch - 50) / 2, 50, 50);
+    T(txt, 203.7, top + pitch / 2, '400 48.6px ' + LAT, '#666', 48.6 * .08, 'middle');
   });
   T(org.name + ' / 統編 ' + org.taxId, 146.2, 1597, '400 40px ' + ZH, '#666', 40 * .11);
   T(org.address, 146.2, 1657, '400 40px ' + ZH, '#666', 40 * .11);
@@ -212,7 +228,7 @@ async function renderCard() {
   return new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error('無法輸出圖片')), 'image/png'));
 }
 $('saveimg').onclick = async () => {
-  const btn = $('saveimg'); btn.disabled = true; btn.textContent = '產生中…';
+  const btn = $('saveimg'), label = btn.innerHTML; btn.disabled = true; btn.textContent = '產生中…';
   try {
     const url = URL.createObjectURL(await renderCard());
     const a = document.createElement('a'); a.href = url; a.download = card.name_zh + '-名片.png';
@@ -220,7 +236,7 @@ $('saveimg').onclick = async () => {
     const img = new Image(); img.src = url; img.alt = '名片圖片';
     openModal('名片圖片', img, '若沒有自動下載，請長按圖片選擇「儲存圖片」。');
   } catch (e) { openModal('儲存失敗', null, e.message); }
-  btn.disabled = false; btn.textContent = '儲存名片';
+  btn.disabled = false; btn.innerHTML = label;
 };
 
 $('status').hidden = true; document.querySelector('.card').hidden = false; document.querySelector('.bar').hidden = false;
