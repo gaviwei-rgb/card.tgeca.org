@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
+    <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>數位名片｜台灣綠能公益發展協會</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;700&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--coral:#f6816c;--vh:1vh;--pad:12px;--gap:12px;--bar:48px}
 @supports (height:1dvh){:root{--vh:1dvh}}
 /* 整個 body（名片 + 按鈕）= 裝置高度 90%；名片維持 9:16，高度取「剩餘高度」與「寬度允許的高度」較小者 */
 :root{--h:min(calc(90 * var(--vh) - 2 * var(--pad) - var(--gap) - var(--bar)), calc((100vw - 2 * var(--pad)) * 16 / 9))}
+    html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 *{box-sizing:border-box}
 body{margin:0;height:calc(90 * var(--vh));background:#e9ecf0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--gap);padding:var(--pad);font-family:"Noto Sans TC",sans-serif}
 .card{position:relative;height:var(--h);width:calc(var(--h) * 9 / 16);flex:none;container-type:inline-size;background:#fff;overflow:hidden;box-shadow:0 1px 8px rgba(0,0,0,.15)}
@@ -71,9 +75,9 @@ window.addEventListener('error', function (e) {
   <p class="t lat" id="site"></p>
 </main>
 <div class="bar" hidden>
-  <button id="save">加入通訊錄</button>
-  <button id="saveimg">儲存名片</button>
-  <button id="share">分享名片</button>
+  <button id="save">加入通訊錄<br>add contact</button>
+  <button id="saveimg">儲存名片<br>saveIMG</button>
+  <button id="share">分享名片<br>share</button>
 </div>
 <div id="modal" hidden><div class="panel"><button id="mclose" aria-label="關閉">×</button><h2 id="mtitle"></h2><div id="mbody"></div><p id="mnote"></p></div></div>
 <script>
